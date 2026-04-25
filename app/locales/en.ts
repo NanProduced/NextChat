@@ -42,6 +42,17 @@ const en: LocaleType = {
         SubTitle: "Change the current topic",
       },
     },
+    Arena: {
+      Title: "Arena Mode",
+      Enable: "Enable Arena",
+      SelectModels: "Select Models",
+      ModelCount: (count: number) =>
+        `Selected ${count} model${count !== 1 ? "s" : ""}`,
+      MinModels: "Please select at least 2 models",
+      MaxModels: "Maximum 4 models can be selected",
+      Stop: "Stop",
+      ResponseError: "Response Error",
+    },
     Actions: {
       ChatList: "Go To Chat List",
       CompressedHistory: "Compressed History Memory Prompt",
