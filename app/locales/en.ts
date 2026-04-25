@@ -690,6 +690,33 @@ const en: LocaleType = {
       View: "View",
     },
   },
+  Stats: {
+    Name: "Stats",
+    Page: {
+      Title: "Chat Statistics",
+      SubTitle: "View your chat data statistics",
+      NoData: "No chat data yet",
+      NoDataSubTitle: "Statistics will appear here after you start chatting",
+    },
+    Summary: {
+      Title: "Overview",
+      TotalSessions: "Total Sessions",
+      TotalMessages: "Total Messages",
+      UserMessages: "User Messages",
+      AssistantMessages: "Assistant Messages",
+      EstimatedTokens: "Estimated Tokens",
+    },
+    Trend: {
+      Title: "Last 7 Days Message Trend",
+      Day: (day: string) => day,
+      Messages: "messages",
+    },
+    TopSessions: {
+      Title: "Top 5 Longest Sessions",
+      Messages: "messages",
+      View: "View",
+    },
+  },
   Plugin: {
     Name: "Plugin",
     Page: {
