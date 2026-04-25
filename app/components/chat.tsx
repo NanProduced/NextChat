@@ -503,6 +503,11 @@ export function ChatActions(props: {
   setShowShortcutKeyModal: React.Dispatch<React.SetStateAction<boolean>>;
   setUserInput: (input: string) => void;
   setShowChatSidePanel: React.Dispatch<React.SetStateAction<boolean>>;
+  isArenaMode: boolean;
+  setIsArenaMode: React.Dispatch<React.SetStateAction<boolean>>;
+  selectedArenaModels: string[];
+  setSelectedArenaModels: React.Dispatch<React.SetStateAction<string[]>>;
+  availableModels: any[];
 }) {
   const config = useAppConfig();
   const navigate = useNavigate();
@@ -555,6 +560,7 @@ export function ChatActions(props: {
   const [showModelSelector, setShowModelSelector] = useState(false);
   const [showPluginSelector, setShowPluginSelector] = useState(false);
   const [showUploadImage, setShowUploadImage] = useState(false);
+  const [showArenaModelSelector, setShowArenaModelSelector] = useState(false);
 
   const [showSizeSelector, setShowSizeSelector] = useState(false);
   const [showQualitySelector, setShowQualitySelector] = useState(false);
@@ -1033,6 +1039,14 @@ function _Chat() {
   const navigate = useNavigate();
   const [attachImages, setAttachImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
+
+  // Arena mode
+  const [isArenaMode, setIsArenaMode] = useState(false);
+  const [selectedArenaModels, setSelectedArenaModels] = useState<string[]>([]);
+  const allModels = useAllModels();
+  const availableModels = useMemo(() => {
+    return allModels.filter((m) => m.available);
+  }, [allModels]);
 
   // prompt hints
   const promptStore = usePromptStore();
@@ -2067,6 +2081,11 @@ function _Chat() {
                 setShowShortcutKeyModal={setShowShortcutKeyModal}
                 setUserInput={setUserInput}
                 setShowChatSidePanel={setShowChatSidePanel}
+                isArenaMode={isArenaMode}
+                setIsArenaMode={setIsArenaMode}
+                selectedArenaModels={selectedArenaModels}
+                setSelectedArenaModels={setSelectedArenaModels}
+                availableModels={availableModels}
               />
               <label
                 className={clsx(styles["chat-input-panel-inner"], {

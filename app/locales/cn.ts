@@ -41,6 +41,16 @@ const cn = {
         SubTitle: "更改当前聊天主题",
       },
     },
+    Arena: {
+      Title: "对决模式",
+      Enable: "开启对决",
+      SelectModels: "选择模型",
+      ModelCount: (count: number) => `已选择 ${count} 个模型`,
+      MinModels: "请至少选择 2 个模型",
+      MaxModels: "最多选择 4 个模型",
+      Stop: "停止",
+      ResponseError: "响应错误",
+    },
     Actions: {
       ChatList: "查看消息列表",
       CompressedHistory: "查看压缩后的历史 Prompt",
