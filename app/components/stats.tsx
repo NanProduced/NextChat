@@ -10,7 +10,7 @@ import { useChatStore } from "../store";
 import {
   calculateChatStats,
   hasAnyData,
-  formatDateKey,
+  parseDateKeyToMonthDay,
 } from "../utils/chat-stats";
 import { List, ListItem } from "./ui-lib";
 
@@ -55,21 +55,19 @@ function TrendChart(props: { data: Array<{ date: string; count: number }> }) {
   }, [props.data]);
 
   const getDayLabel = (dateStr: string) => {
-    try {
-      const date = new Date(dateStr);
-      const month = date.getMonth() + 1;
-      const day = date.getDate();
-      return Locale.Stats.Trend.Day(`${month}/${day}`);
-    } catch {
-      return dateStr;
+    const parsed = parseDateKeyToMonthDay(dateStr);
+    if (parsed) {
+      return Locale.Stats.Trend.Day(`${parsed.month}/${parsed.day}`);
     }
+    return dateStr;
   };
 
   return (
     <div className={styles["trend-chart"]}>
       <div className={styles["trend-chart-bars"]}>
         {props.data.map((item, index) => {
-          const heightPercent = maxCount > 0 ? (item.count / maxCount) * 100 : 0;
+          const heightPercent =
+            maxCount > 0 ? (item.count / maxCount) * 100 : 0;
           return (
             <div key={index} className={styles["trend-bar"]}>
               <div className={styles["trend-bar-container"]}>
@@ -81,9 +79,7 @@ function TrendChart(props: { data: Array<{ date: string; count: number }> }) {
               <div className={styles["trend-bar-label"]}>
                 {getDayLabel(item.date)}
               </div>
-              <div className={styles["trend-bar-count"]}>
-                {item.count}
-              </div>
+              <div className={styles["trend-bar-count"]}>{item.count}</div>
             </div>
           );
         })}
@@ -98,9 +94,7 @@ function TopSessionsList(props: {
 }) {
   if (props.sessions.length === 0) {
     return (
-      <div className={styles["empty-list"]}>
-        {Locale.Stats.Page.NoData}
-      </div>
+      <div className={styles["empty-list"]}>{Locale.Stats.Page.NoData}</div>
     );
   }
 

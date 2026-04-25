@@ -6,6 +6,7 @@ import {
   calculateEstimatedTokens,
   parseMessageDate,
   formatDateKey,
+  parseDateKeyToMonthDay,
   getLast7Days,
   calculateLast7DaysTrend,
   getTopLongestSessions,
@@ -160,6 +161,79 @@ describe("chat-stats", () => {
       expect(parseMessageDate("invalid-date")).toBeNull();
       expect(parseMessageDate("")).toBeNull();
     });
+
+    test("should parse year-first format (2024/04/25)", () => {
+      const date = parseMessageDate("2024/04/25 10:30:00");
+      expect(date).not.toBeNull();
+      expect(date?.getFullYear()).toBe(2024);
+      expect(date?.getMonth()).toBe(3);
+      expect(date?.getDate()).toBe(25);
+    });
+
+    test("should parse month-first format (4/25/2024)", () => {
+      const date = parseMessageDate("4/25/2024 10:30:00");
+      expect(date).not.toBeNull();
+      expect(date?.getFullYear()).toBe(2024);
+      expect(date?.getMonth()).toBe(3);
+      expect(date?.getDate()).toBe(25);
+    });
+
+    test("should parse day-first format when day > 12 (25/4/2024)", () => {
+      const date = parseMessageDate("25/4/2024 10:30:00");
+      expect(date).not.toBeNull();
+      expect(date?.getFullYear()).toBe(2024);
+      expect(date?.getMonth()).toBe(3);
+      expect(date?.getDate()).toBe(25);
+    });
+
+    test("should parse day-first format with leading zeros (25/04/2024)", () => {
+      const date = parseMessageDate("25/04/2024, 10:30:00");
+      expect(date).not.toBeNull();
+      expect(date?.getFullYear()).toBe(2024);
+      expect(date?.getMonth()).toBe(3);
+      expect(date?.getDate()).toBe(25);
+    });
+
+    test("should return null for ambiguous dates when both parts <= 12", () => {
+      const date = parseMessageDate("5/4/2024 10:30:00");
+      expect(date).not.toBeNull();
+    });
+
+    test("should return null for invalid month or day", () => {
+      expect(parseMessageDate("13/25/2024")).toBeNull();
+      expect(parseMessageDate("0/5/2024")).toBeNull();
+      expect(parseMessageDate("5/32/2024")).toBeNull();
+    });
+  });
+
+  describe("parseDateKeyToMonthDay", () => {
+    test("should parse YYYY-MM-DD format correctly", () => {
+      const result = parseDateKeyToMonthDay("2024-04-25");
+      expect(result).not.toBeNull();
+      expect(result?.month).toBe(4);
+      expect(result?.day).toBe(25);
+    });
+
+    test("should parse with leading zeros", () => {
+      const result = parseDateKeyToMonthDay("2024-01-05");
+      expect(result).not.toBeNull();
+      expect(result?.month).toBe(1);
+      expect(result?.day).toBe(5);
+    });
+
+    test("should return null for invalid format", () => {
+      expect(parseDateKeyToMonthDay("2024/04/25")).toBeNull();
+      expect(parseDateKeyToMonthDay("04-25-2024")).toBeNull();
+      expect(parseDateKeyToMonthDay("invalid")).toBeNull();
+      expect(parseDateKeyToMonthDay("")).toBeNull();
+    });
+
+    test("should return null for invalid month or day", () => {
+      expect(parseDateKeyToMonthDay("2024-13-01")).toBeNull();
+      expect(parseDateKeyToMonthDay("2024-00-01")).toBeNull();
+      expect(parseDateKeyToMonthDay("2024-04-32")).toBeNull();
+      expect(parseDateKeyToMonthDay("2024-04-00")).toBeNull();
+    });
   });
 
   describe("formatDateKey", () => {
@@ -279,6 +353,41 @@ describe("chat-stats", () => {
 
       const top3 = getTopLongestSessions(sessions, 3);
       expect(top3.length).toBe(3);
+    });
+
+    test("should filter out empty sessions", () => {
+      const sessions: SimpleChatSession[] = [
+        createMockSession([], "Empty Session 1"),
+        createMockSession(
+          [createMockMessage("user", "Hello")],
+          "Session with 1 message",
+        ),
+        createMockSession([], "Empty Session 2"),
+        createMockSession(
+          [
+            createMockMessage("user", "1"),
+            createMockMessage("assistant", "2"),
+          ],
+          "Session with 2 messages",
+        ),
+        createMockSession([], "Empty Session 3"),
+      ];
+
+      const topSessions = getTopLongestSessions(sessions, 5);
+
+      expect(topSessions.length).toBe(2);
+      expect(topSessions[0].messageCount).toBe(2);
+      expect(topSessions[1].messageCount).toBe(1);
+    });
+
+    test("should return empty array when all sessions are empty", () => {
+      const sessions: SimpleChatSession[] = [
+        createMockSession([], "Empty Session 1"),
+        createMockSession([], "Empty Session 2"),
+      ];
+
+      const topSessions = getTopLongestSessions(sessions, 5);
+      expect(topSessions.length).toBe(0);
     });
   });
 
