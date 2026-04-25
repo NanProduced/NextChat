@@ -681,6 +681,33 @@ const cn = {
       View: "查看",
     },
   },
+  Stats: {
+    Name: "统计",
+    Page: {
+      Title: "聊天统计",
+      SubTitle: "查看您的聊天数据统计",
+      NoData: "暂无聊天数据",
+      NoDataSubTitle: "开始聊天后，这里将显示您的统计数据",
+    },
+    Summary: {
+      Title: "概览",
+      TotalSessions: "会话总数",
+      TotalMessages: "消息总数",
+      UserMessages: "用户消息",
+      AssistantMessages: "助手消息",
+      EstimatedTokens: "估算 Token",
+    },
+    Trend: {
+      Title: "最近 7 天消息趋势",
+      Day: (day: string) => day,
+      Messages: "条消息",
+    },
+    TopSessions: {
+      Title: "最长会话 Top 5",
+      Messages: "条消息",
+      View: "查看",
+    },
+  },
   Plugin: {
     Name: "插件",
     Page: {
