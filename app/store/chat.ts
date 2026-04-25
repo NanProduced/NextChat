@@ -34,7 +34,10 @@ import { createPersistStore } from "../utils/store";
 import { estimateTokenLength } from "../utils/token";
 import { ModelConfig, ModelType, useAppConfig } from "./config";
 import { useAccessStore } from "./access";
-import { collectModelsWithDefaultModel } from "../utils/model";
+import {
+  collectModelsWithDefaultModel,
+  getModelProvider,
+} from "../utils/model";
 import { createEmptyMask, Mask } from "./mask";
 import { executeMcpAction, getAllTools, isMcpEnabled } from "../mcp/actions";
 import { extractMcpJson, isMcpJson } from "../mcp/utils";
@@ -524,6 +527,151 @@ export const useChatStore = createPersistStore(
               controller,
             );
           },
+        });
+      },
+
+      async onArenaUserInput(
+        content: string,
+        attachImages?: string[],
+        selectedModels?: string[],
+      ) {
+        if (!selectedModels || selectedModels.length < 2) {
+          showToast(Locale.Arena.MinModels);
+          return;
+        }
+
+        const session = get().currentSession();
+        const baseModelConfig = session.mask.modelConfig;
+
+        let mContent: string | MultimodalContent[] = fillTemplateWith(
+          content,
+          baseModelConfig,
+        );
+
+        if (attachImages && attachImages.length > 0) {
+          mContent = [
+            ...(content ? [{ type: "text" as const, text: content }] : []),
+            ...attachImages.map((url) => ({
+              type: "image_url" as const,
+              image_url: { url },
+            })),
+          ];
+        }
+
+        let userMessage: ChatMessage = createMessage({
+          role: "user",
+          content: mContent,
+        });
+
+        const recentMessages = await get().getMessagesWithMemory();
+        const sendMessages = recentMessages.concat(userMessage);
+
+        const botMessages: ChatMessage[] = [];
+        const messageIndices: number[] = [];
+
+        for (const modelWithProvider of selectedModels) {
+          const [model, providerName] = getModelProvider(modelWithProvider);
+          const botMessage: ChatMessage = createMessage({
+            role: "assistant",
+            streaming: true,
+            model: model,
+          });
+          botMessages.push(botMessage);
+          messageIndices.push(
+            session.messages.length + 1 + botMessages.length - 1,
+          );
+        }
+
+        get().updateTargetSession(session, (session) => {
+          const savedUserMessage = {
+            ...userMessage,
+            content: mContent,
+          };
+          session.messages = session.messages.concat([
+            savedUserMessage,
+            ...botMessages,
+          ]);
+        });
+
+        selectedModels.forEach((modelWithProvider, index) => {
+          const [model, providerName] = getModelProvider(modelWithProvider);
+          const botMessage = botMessages[index];
+          const messageIndex = messageIndices[index];
+
+          const modelConfig = {
+            ...baseModelConfig,
+            model: model as ModelType,
+            providerName:
+              (providerName as ServiceProvider) || ServiceProvider.OpenAI,
+          };
+
+          const api: ClientApi = getClientApi(modelConfig.providerName);
+
+          api.llm.chat({
+            messages: sendMessages,
+            config: { ...modelConfig, stream: true },
+            onUpdate(message) {
+              botMessage.streaming = true;
+              if (message) {
+                botMessage.content = message;
+              }
+              get().updateTargetSession(session, (session) => {
+                session.messages = session.messages.concat();
+              });
+            },
+            async onFinish(message) {
+              botMessage.streaming = false;
+              if (message) {
+                botMessage.content = message;
+                botMessage.date = new Date().toLocaleString();
+                get().onNewMessage(botMessage, session);
+              }
+              ChatControllerPool.remove(session.id, botMessage.id);
+            },
+            onBeforeTool(tool: ChatMessageTool) {
+              (botMessage.tools = botMessage?.tools || []).push(tool);
+              get().updateTargetSession(session, (session) => {
+                session.messages = session.messages.concat();
+              });
+            },
+            onAfterTool(tool: ChatMessageTool) {
+              botMessage?.tools?.forEach((t, i, tools) => {
+                if (tool.id == t.id) {
+                  tools[i] = { ...tool };
+                }
+              });
+              get().updateTargetSession(session, (session) => {
+                session.messages = session.messages.concat();
+              });
+            },
+            onError(error) {
+              const isAborted = error.message?.includes?.("aborted");
+              botMessage.content +=
+                "\n\n" +
+                prettyObject({
+                  error: true,
+                  message: error.message,
+                });
+              botMessage.streaming = false;
+              botMessage.isError = !isAborted;
+              get().updateTargetSession(session, (session) => {
+                session.messages = session.messages.concat();
+              });
+              ChatControllerPool.remove(
+                session.id,
+                botMessage.id ?? messageIndex,
+              );
+
+              console.error("[Chat] failed ", error);
+            },
+            onController(controller) {
+              ChatControllerPool.addController(
+                session.id,
+                botMessage.id ?? messageIndex,
+                controller,
+              );
+            },
+          });
         });
       },
 

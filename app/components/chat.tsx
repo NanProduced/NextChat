@@ -841,6 +841,47 @@ export function ChatActions(props: {
         {!isMobileScreen && <MCPAction />}
       </>
       <div className={styles["chat-input-actions-end"]}>
+        <ChatAction
+          onClick={() => {
+            props.setIsArenaMode(!props.isArenaMode);
+            if (!props.isArenaMode) {
+              props.setSelectedArenaModels([]);
+            }
+          }}
+          text={props.isArenaMode ? Locale.Arena.Title : Locale.Arena.Enable}
+          icon={<BrainIcon />}
+        />
+        {props.isArenaMode && (
+          <>
+            <ChatAction
+              onClick={() => setShowArenaModelSelector(true)}
+              text={Locale.Arena.ModelCount(props.selectedArenaModels.length)}
+              icon={<RobotIcon />}
+            />
+            {showArenaModelSelector && (
+              <Selector
+                multiple
+                defaultSelectedValue={props.selectedArenaModels}
+                items={props.availableModels.map((m) => ({
+                  title: `${m.displayName}${
+                    m?.provider?.providerName
+                      ? " (" + m?.provider?.providerName + ")"
+                      : ""
+                  }`,
+                  value: `${m.name}@${m?.provider?.providerName}`,
+                }))}
+                onClose={() => setShowArenaModelSelector(false)}
+                onSelection={(s) => {
+                  if (s.length > 4) {
+                    showToast(Locale.Arena.MaxModels);
+                    return;
+                  }
+                  props.setSelectedArenaModels(s);
+                }}
+              />
+            )}
+          </>
+        )}
         {config.realtimeConfig.enable && (
           <ChatAction
             onClick={() => props.setShowChatSidePanel(true)}
@@ -1126,9 +1167,17 @@ function _Chat() {
       return;
     }
     setIsLoading(true);
-    chatStore
-      .onUserInput(userInput, attachImages)
-      .then(() => setIsLoading(false));
+
+    if (isArenaMode && selectedArenaModels.length >= 2) {
+      chatStore
+        .onArenaUserInput(userInput, attachImages, selectedArenaModels)
+        .then(() => setIsLoading(false));
+    } else {
+      chatStore
+        .onUserInput(userInput, attachImages)
+        .then(() => setIsLoading(false));
+    }
+
     setAttachImages([]);
     chatStore.setLastInput(userInput);
     setUserInput("");
