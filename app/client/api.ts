@@ -96,6 +96,7 @@ export interface LLMModel {
   available: boolean;
   provider: LLMModelProvider;
   sorted: number;
+  isDefault?: boolean;
 }
 
 export interface LLMModelProvider {
@@ -271,6 +272,9 @@ export function getHeaders(ignoreHeaders: boolean = false) {
       modelConfig.providerName === ServiceProvider.SiliconFlow;
     const isAI302 = modelConfig.providerName === ServiceProvider["302.AI"];
     const isEnabledAccessControl = accessStore.enabledAccessControl();
+    const customEndpoint = accessStore.customEndpoints?.find(
+      (e) => e.name === modelConfig.providerName,
+    );
     const apiKey = isGoogle
       ? accessStore.googleApiKey
       : isAzure
@@ -297,6 +301,8 @@ export function getHeaders(ignoreHeaders: boolean = false) {
         : ""
       : isAI302
       ? accessStore.ai302ApiKey
+      : customEndpoint
+      ? customEndpoint.apiKey
       : accessStore.openaiApiKey;
     return {
       isGoogle,

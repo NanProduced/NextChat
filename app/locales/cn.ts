@@ -108,6 +108,24 @@ const cn = {
       showShortcutKey: "显示快捷方式",
       clearContext: "清除上下文",
     },
+    Arena: {
+      Title: "对决模式",
+      Toggle: "对决",
+      SelectModels: "选择模型",
+      MinModels: "至少选择 2 个模型",
+      MaxModels: "最多选择 4 个模型",
+      ModelCount: (count: number) => `已选 ${count} 个模型`,
+      Stop: "停止",
+      Streaming: "生成中…",
+      Error: "出错了",
+      NoModels: "请先选择参与对决的模型",
+      Close: "关闭对决",
+      Presets: "预设组合",
+      PresetGPTvsClaude: "GPT vs Claude",
+      PresetDomestic: "国产大模型",
+      PresetOpenSource: "开源模型",
+      LastUsed: "上次使用",
+    },
   },
   Export: {
     Title: "分享聊天记录",
@@ -537,6 +555,31 @@ const cn = {
       CustomModel: {
         Title: "自定义模型名",
         SubTitle: "增加自定义模型可选项，使用英文逗号隔开",
+        AddModel: "添加",
+        Help: "语法帮助",
+      },
+      CustomEndpoints: {
+        Title: "自定义 OpenAI 兼容端点",
+        SubTitle:
+          "添加使用 OpenAI 协议兼容的 API 端点，每个端点可配置独立的 base_url、API Key 和模型列表",
+        Add: "添加端点",
+        Cancel: "取消",
+        Name: "端点名称",
+        BaseUrl: "Base URL",
+        ApiKey: "API Key",
+        Models: "模型列表（逗号分隔）",
+        NamePlaceholder: "如：StepFun、DashScope、DeepSeek",
+        UrlPlaceholder: "https://api.stepfun.com/v1",
+        KeyPlaceholder: "sk-...",
+        ModelsPlaceholder: "step-1v-8k, step-2-16k",
+        UsageGuide:
+          "配置完成后，回到聊天页面，点击模型选择器即可看到以端点名称分组的模型 📌",
+        ConfigRequired:
+          "⚠️ 请确保已开启上方的「使用自定义配置」开关，否则自定义端点不会生效",
+        NoEndpoints: "暂无端点，点击上方按钮添加",
+        EndpointCount: "已配置 {0} 个端点",
+        DeleteConfirm: "确定删除此端点？",
+        ModelTagTip: "模型",
       },
       AI302: {
         ApiKey: {

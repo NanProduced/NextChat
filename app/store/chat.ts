@@ -63,6 +63,8 @@ export type ChatMessage = RequestMessage & {
   tools?: ChatMessageTool[];
   audio_url?: string;
   isMcpResponse?: boolean;
+  arenaId?: string;
+  arenaProviderName?: string;
 };
 
 export function createMessage(override: Partial<ChatMessage>): ChatMessage {
@@ -524,6 +526,118 @@ export const useChatStore = createPersistStore(
               controller,
             );
           },
+        });
+      },
+
+      async onArenaInput(
+        content: string,
+        arenaModels: { model: string; providerName: string }[],
+        attachImages?: string[],
+      ) {
+        const session = get().currentSession();
+        const modelConfig = session.mask.modelConfig;
+
+        let mContent: string | MultimodalContent[] = fillTemplateWith(
+          content,
+          modelConfig,
+        );
+
+        if (attachImages && attachImages.length > 0) {
+          mContent = [
+            ...(content ? [{ type: "text" as const, text: content }] : []),
+            ...attachImages.map((url) => ({
+              type: "image_url" as const,
+              image_url: { url },
+            })),
+          ];
+        }
+
+        const userMessage: ChatMessage = createMessage({
+          role: "user",
+          content: mContent,
+        });
+
+        const arenaId = nanoid();
+
+        const botMessages: ChatMessage[] = arenaModels.map((m) =>
+          createMessage({
+            role: "assistant",
+            streaming: true,
+            model: m.model,
+            arenaId,
+            arenaProviderName: m.providerName,
+          }),
+        );
+
+        const recentMessages = await get().getMessagesWithMemory();
+
+        const sendMessages = recentMessages.concat(userMessage);
+
+        get().updateTargetSession(session, (session) => {
+          session.messages = session.messages.concat([
+            { ...userMessage, content: mContent },
+            ...botMessages,
+          ]);
+        });
+
+        arenaModels.forEach((arenaModel, index) => {
+          const botMessage = botMessages[index];
+          const arenaModelConfig = {
+            ...modelConfig,
+            model: arenaModel.model,
+            providerName: arenaModel.providerName,
+            stream: true,
+          };
+
+          const api: ClientApi = getClientApi(
+            arenaModel.providerName as ServiceProvider,
+          );
+
+          api.llm.chat({
+            messages: sendMessages,
+            config: arenaModelConfig,
+            onUpdate(message) {
+              botMessage.streaming = true;
+              if (message) {
+                botMessage.content = message;
+              }
+              get().updateTargetSession(session, (session) => {
+                session.messages = session.messages.concat();
+              });
+            },
+            async onFinish(message) {
+              botMessage.streaming = false;
+              if (message) {
+                botMessage.content = message;
+                botMessage.date = new Date().toLocaleString();
+                get().onNewMessage(botMessage, session);
+              }
+              ChatControllerPool.remove(session.id, botMessage.id);
+            },
+            onError(error) {
+              const isAborted = error.message?.includes?.("aborted");
+              botMessage.content +=
+                "\n\n" +
+                prettyObject({
+                  error: true,
+                  message: error.message,
+                });
+              botMessage.streaming = false;
+              botMessage.isError = !isAborted;
+              get().updateTargetSession(session, (session) => {
+                session.messages = session.messages.concat();
+              });
+              ChatControllerPool.remove(session.id, botMessage.id);
+              console.error("[Arena] failed ", error);
+            },
+            onController(controller) {
+              ChatControllerPool.addController(
+                session.id,
+                botMessage.id,
+                controller,
+              );
+            },
+          });
         });
       },
 

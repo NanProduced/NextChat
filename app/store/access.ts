@@ -149,8 +149,19 @@ const DEFAULT_ACCESS_STATE = {
   defaultModel: "",
   visionModels: "",
 
+  // custom openai-compatible endpoints
+  customEndpoints: [] as CustomEndpoint[],
+
   // tts config
   edgeTTSVoiceName: "zh-CN-YunxiNeural",
+};
+
+export type CustomEndpoint = {
+  id: string;
+  name: string;
+  baseUrl: string;
+  apiKey: string;
+  models: string[];
 };
 
 export const useAccessStore = createPersistStore(

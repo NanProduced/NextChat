@@ -88,6 +88,8 @@ import Locale from "../locales";
 
 import { IconButton } from "./button";
 import styles from "./chat.module.scss";
+import { ArenaModel, ArenaResponseGrid } from "./arena";
+import { ModelSelector } from "./model-selector";
 
 import {
   List,
@@ -503,6 +505,10 @@ export function ChatActions(props: {
   setShowShortcutKeyModal: React.Dispatch<React.SetStateAction<boolean>>;
   setUserInput: (input: string) => void;
   setShowChatSidePanel: React.Dispatch<React.SetStateAction<boolean>>;
+  arenaMode: boolean;
+  setArenaMode: (mode: boolean) => void;
+  arenaModels: ArenaModel[];
+  setShowArenaModelSelector: (show: boolean) => void;
 }) {
   const config = useAppConfig();
   const navigate = useNavigate();
@@ -584,14 +590,14 @@ export function ChatActions(props: {
       // show next model to default model if exist
       let nextModel = models.find((model) => model.isDefault) || models[0];
       chatStore.updateTargetSession(session, (session) => {
-        session.mask.modelConfig.model = nextModel.name;
-        session.mask.modelConfig.providerName = nextModel?.provider
+        session.mask.modelConfig.model = nextModel!.name;
+        session.mask.modelConfig.providerName = nextModel!.provider
           ?.providerName as ServiceProvider;
       });
       showToast(
-        nextModel?.provider?.providerName == "ByteDance"
-          ? nextModel.displayName
-          : nextModel.name,
+        nextModel!.provider?.providerName == "ByteDance"
+          ? nextModel!.displayName ?? nextModel!.name
+          : nextModel!.name,
       );
     }
   }, [chatStore, currentModel, models, session]);
@@ -679,18 +685,26 @@ export function ChatActions(props: {
           icon={<RobotIcon />}
         />
 
+        <ChatAction
+          onClick={() => {
+            props.setArenaMode(!props.arenaMode);
+            if (props.arenaMode) {
+              props.setShowArenaModelSelector(false);
+            } else {
+              props.setShowArenaModelSelector(true);
+            }
+          }}
+          text={
+            props.arenaMode
+              ? `${Locale.Chat.Arena.Toggle} (${props.arenaModels.length})`
+              : Locale.Chat.Arena.Toggle
+          }
+          icon={<RobotIcon />}
+        />
+
         {showModelSelector && (
-          <Selector
-            defaultSelectedValue={`${currentModel}@${currentProviderName}`}
-            items={models.map((m) => ({
-              title: `${m.displayName}${
-                m?.provider?.providerName
-                  ? " (" + m?.provider?.providerName + ")"
-                  : ""
-              }`,
-              value: `${m.name}@${m?.provider?.providerName}`,
-            }))}
-            onClose={() => setShowModelSelector(false)}
+          <ModelSelector
+            selectedValues={[`${currentModel}@${currentProviderName}`]}
             onSelection={(s) => {
               if (s.length === 0) return;
               const [model, providerName] = getModelProvider(s[0]);
@@ -711,6 +725,7 @@ export function ChatActions(props: {
                 showToast(model);
               }
             }}
+            onClose={() => setShowModelSelector(false)}
           />
         )}
 
@@ -1034,6 +1049,22 @@ function _Chat() {
   const [attachImages, setAttachImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
 
+  const [arenaMode, setArenaMode] = useState(false);
+  const [arenaModels, setArenaModels] = useState<ArenaModel[]>(() => {
+    try {
+      const saved = localStorage.getItem("arena-models");
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return [];
+  });
+  const [showArenaModelSelector, setShowArenaModelSelector] = useState(false);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("arena-models", JSON.stringify(arenaModels));
+    } catch {}
+  }, [arenaModels]);
+
   // prompt hints
   const promptStore = usePromptStore();
   const [promptHints, setPromptHints] = useState<RenderPrompt[]>([]);
@@ -1111,10 +1142,20 @@ function _Chat() {
       matchCommand.invoke();
       return;
     }
-    setIsLoading(true);
-    chatStore
-      .onUserInput(userInput, attachImages)
-      .then(() => setIsLoading(false));
+    if (arenaMode) {
+      if (arenaModels.length < 2) {
+        showToast(Locale.Chat.Arena.NoModels);
+        return;
+      }
+      chatStore
+        .onArenaInput(userInput, arenaModels, attachImages)
+        .then(() => setIsLoading(false));
+    } else {
+      setIsLoading(true);
+      chatStore
+        .onUserInput(userInput, attachImages)
+        .then(() => setIsLoading(false));
+    }
     setAttachImages([]);
     chatStore.setLastInput(userInput);
     setUserInput("");
@@ -1780,10 +1821,56 @@ function _Chat() {
                 setAutoScroll(false);
               }}
             >
-              {messages
-                // TODO
-                // .filter((m) => !m.isMcpResponse)
-                .map((message, i) => {
+              {(() => {
+                type RenderGroup =
+                  | { type: "single"; message: RenderMessage; index: number }
+                  | {
+                      type: "arena";
+                      messages: RenderMessage[];
+                      indices: number[];
+                    };
+                const groups: RenderGroup[] = [];
+                let i = 0;
+                while (i < messages.length) {
+                  const msg = messages[i];
+                  if (msg.role === "assistant" && msg.arenaId && !msg.preview) {
+                    const arenaId = msg.arenaId;
+                    const arenaMsgs: RenderMessage[] = [];
+                    const indices: number[] = [];
+                    while (
+                      i < messages.length &&
+                      messages[i].arenaId === arenaId
+                    ) {
+                      arenaMsgs.push(messages[i]);
+                      indices.push(i);
+                      i++;
+                    }
+                    groups.push({
+                      type: "arena",
+                      messages: arenaMsgs,
+                      indices,
+                    });
+                  } else {
+                    groups.push({ type: "single", message: msg, index: i });
+                    i++;
+                  }
+                }
+                return groups.map((group) => {
+                  if (group.type === "arena") {
+                    return (
+                      <div key={`arena-${group.messages[0]?.arenaId}`}>
+                        <ArenaResponseGrid
+                          messages={group.messages}
+                          sessionId={session.id}
+                          fontSize={fontSize}
+                          fontFamily={fontFamily}
+                          parentRef={scrollRef}
+                        />
+                      </div>
+                    );
+                  }
+                  const message = group.message;
+                  const i = group.index;
                   const isUser = message.role === "user";
                   const isContext = i < context.length;
                   const showActions =
@@ -2037,13 +2124,36 @@ function _Chat() {
                       {shouldShowClearContextDivider && <ClearContextDivider />}
                     </Fragment>
                   );
-                })}
+                });
+              })()}
             </div>
             <div className={styles["chat-input-panel"]}>
               <PromptHints
                 prompts={promptHints}
                 onPromptSelect={onPromptSelect}
               />
+
+              {arenaMode && showArenaModelSelector && (
+                <ModelSelector
+                  multiple
+                  maxSelections={4}
+                  selectedValues={arenaModels.map(
+                    (m) => `${m.model}@${m.providerName}`,
+                  )}
+                  onSelection={(values) => {
+                    setArenaModels(
+                      values.map((v) => {
+                        const [model, providerName] = getModelProvider(v);
+                        return {
+                          model,
+                          providerName: providerName ?? ServiceProvider.OpenAI,
+                        };
+                      }),
+                    );
+                  }}
+                  onClose={() => setShowArenaModelSelector(false)}
+                />
+              )}
 
               <ChatActions
                 uploadImage={uploadImage}
@@ -2067,6 +2177,10 @@ function _Chat() {
                 setShowShortcutKeyModal={setShowShortcutKeyModal}
                 setUserInput={setUserInput}
                 setShowChatSidePanel={setShowChatSidePanel}
+                arenaMode={arenaMode}
+                setArenaMode={setArenaMode}
+                arenaModels={arenaModels}
+                setShowArenaModelSelector={setShowArenaModelSelector}
               />
               <label
                 className={clsx(styles["chat-input-panel-inner"], {

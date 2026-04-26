@@ -109,6 +109,24 @@ const en: LocaleType = {
       showShortcutKey: "Show Shortcuts",
       clearContext: "Clear Context",
     },
+    Arena: {
+      Title: "Arena Mode",
+      Toggle: "Arena",
+      SelectModels: "Select Models",
+      MinModels: "Select at least 2 models",
+      MaxModels: "Select at most 4 models",
+      ModelCount: (count: number) => `${count} model(s) selected`,
+      Stop: "Stop",
+      Streaming: "Generating…",
+      Error: "Error",
+      NoModels: "Please select models for the arena",
+      Close: "Close Arena",
+      Presets: "Presets",
+      PresetGPTvsClaude: "GPT vs Claude",
+      PresetDomestic: "Chinese LLMs",
+      PresetOpenSource: "Open Source",
+      LastUsed: "Last Used",
+    },
   },
   Export: {
     Title: "Export Messages",
@@ -521,6 +539,31 @@ const en: LocaleType = {
       CustomModel: {
         Title: "Custom Models",
         SubTitle: "Custom model options, seperated by comma",
+        AddModel: "Add",
+        Help: "Syntax Help",
+      },
+      CustomEndpoints: {
+        Title: "Custom OpenAI-Compatible Endpoints",
+        SubTitle:
+          "Add OpenAI-compatible API endpoints with independent base_url, API Key, and model list",
+        Add: "Add Endpoint",
+        Cancel: "Cancel",
+        Name: "Endpoint Name",
+        BaseUrl: "Base URL",
+        ApiKey: "API Key",
+        Models: "Models (comma separated)",
+        NamePlaceholder: "e.g. StepFun, DashScope, DeepSeek",
+        UrlPlaceholder: "https://api.stepfun.com/v1",
+        KeyPlaceholder: "sk-...",
+        ModelsPlaceholder: "step-1v-8k, step-2-16k",
+        UsageGuide:
+          "After configuration, go to chat page and click model selector to see models grouped by endpoint name 📌",
+        ConfigRequired:
+          '⚠️ Make sure "Use Custom Config" toggle above is enabled, otherwise custom endpoints won\'t take effect',
+        NoEndpoints: "No endpoints yet. Click add button above.",
+        EndpointCount: "{0} endpoint(s) configured",
+        DeleteConfirm: "Delete this endpoint?",
+        ModelTagTip: "model",
       },
       Google: {
         ApiKey: {
