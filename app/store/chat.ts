@@ -38,6 +38,7 @@ import { collectModelsWithDefaultModel } from "../utils/model";
 import { createEmptyMask, Mask } from "./mask";
 import { executeMcpAction, getAllTools, isMcpEnabled } from "../mcp/actions";
 import { extractMcpJson, isMcpJson } from "../mcp/utils";
+import { useArenaStore, ArenaModelIdentifier } from "./arena";
 
 const localStorage = safeLocalStorage();
 
@@ -568,6 +569,17 @@ export const useChatStore = createPersistStore(
             arenaProviderName: m.providerName,
           }),
         );
+
+        const arenaStore = useArenaStore.getState();
+        const existingDuel = arenaStore.getDuelByArenaId(arenaId);
+        if (!existingDuel) {
+          arenaStore.createDuel(
+            arenaId,
+            session.id,
+            typeof content === "string" ? content : JSON.stringify(content),
+            arenaModels as ArenaModelIdentifier[],
+          );
+        }
 
         const recentMessages = await get().getMessagesWithMemory();
 

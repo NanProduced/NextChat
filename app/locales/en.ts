@@ -126,6 +126,13 @@ const en: LocaleType = {
       PresetDomestic: "Chinese LLMs",
       PresetOpenSource: "Open Source",
       LastUsed: "Last Used",
+      BlindTestTitle: "Blind Test Voting",
+      BlindTestHint: "Model names are hidden as A/B/C/D, vote based on response quality",
+      VoteBetter: "Better",
+      VoteWorse: "Worse",
+      VoteTie: "Tie",
+      RevealResult: "Reveal Result",
+      VoteResultTitle: "Vote Result",
     },
   },
   Export: {

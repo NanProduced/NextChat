@@ -125,6 +125,13 @@ const cn = {
       PresetDomestic: "国产大模型",
       PresetOpenSource: "开源模型",
       LastUsed: "上次使用",
+      BlindTestTitle: "盲测投票",
+      BlindTestHint: "模型名称已隐藏为 A/B/C/D，根据回复质量投票",
+      VoteBetter: "更好",
+      VoteWorse: "不行",
+      VoteTie: "平局",
+      RevealResult: "揭晓结果",
+      VoteResultTitle: "投票结果",
     },
   },
   Export: {
