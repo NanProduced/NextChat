@@ -139,7 +139,7 @@ export const useArenaStore = createPersistStore(
     },
 
     hasVoted(arenaId: string): boolean {
-      const duel = get().getDuelByArenaId(arenaId);
+      const duel = get().duels.find((d) => d.arenaId === arenaId);
       if (!duel) return false;
       return Object.values(duel.votes).some((v) => v !== null);
     },
