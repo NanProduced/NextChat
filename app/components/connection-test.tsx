@@ -74,14 +74,16 @@ export function ConnectionTestButton(props: ConnectionTestButtonProps) {
         onClick={handleTest}
         disabled={status === "testing"}
         className={`${styles["connection-test-button"]} ${
-          styles[`connection-test-${status}`]
+          styles["connection-test-" + status] ?? ""
         }`}
       />
 
       {result && (
         <div
           className={`${styles["connection-test-result"]} ${
-            styles[`connection-test-result-${result.success ? "success" : "error"}`]
+            styles[
+              "connection-test-result-" + (result.success ? "success" : "error")
+            ] ?? ""
           }`}
         >
           {result.success ? (
@@ -100,9 +102,11 @@ export function ConnectionTestButton(props: ConnectionTestButtonProps) {
                     formatLatency(result.latency || 0),
                   )}
                   {" • "}
-                  {Locale.Settings.Access.OpenAI.Endpoint.Quality[
-                    getConnectionQuality(result.latency || 0)
-                  ]}
+                  {
+                    Locale.Settings.Access.OpenAI.Endpoint.Quality[
+                      getConnectionQuality(result.latency || 0)
+                    ]
+                  }
                 </span>
               </div>
             </div>
@@ -111,7 +115,8 @@ export function ConnectionTestButton(props: ConnectionTestButtonProps) {
               <span className={styles["connection-test-icon"]}>✗</span>
               <div className={styles["connection-test-details"]}>
                 <span className={styles["connection-test-message"]}>
-                  {result.error || Locale.Settings.Access.OpenAI.Endpoint.ConnectionFailed}
+                  {result.error ||
+                    Locale.Settings.Access.OpenAI.Endpoint.ConnectionFailed}
                 </span>
                 {result.latency && (
                   <span className={styles["connection-test-latency"]}>

@@ -1,4 +1,10 @@
-import React, { useMemo, useState, useRef, useEffect, useCallback } from "react";
+import React, {
+  useMemo,
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+} from "react";
 import { useAllModels } from "../utils/hooks";
 import { Avatar } from "./emoji";
 import { IconButton } from "./button";
@@ -146,8 +152,10 @@ export function ModelSelector(props: ModelSelectorProps) {
 
     const defaultModel = filteredModels.find((m) => m.isDefault);
     const others = filteredModels.filter((m) => !m.isDefault);
-    const visible = [defaultModel, ...others.slice(0, VISIBLE_MODELS_COUNT - (defaultModel ? 1 : 0))]
-      .filter(Boolean) as ModelOption[];
+    const visible = [
+      defaultModel,
+      ...others.slice(0, VISIBLE_MODELS_COUNT - (defaultModel ? 1 : 0)),
+    ].filter(Boolean) as ModelOption[];
 
     return visible;
   }, [filteredModels, search, showAllModels]);
@@ -216,7 +224,11 @@ export function ModelSelector(props: ModelSelectorProps) {
       const available = preset.models.filter((m) =>
         modelOptions.some((o) => `${o.name}@${o.providerName}` === m),
       );
-      if (available.length >= 2 && maxSelections && available.length <= maxSelections) {
+      if (
+        available.length >= 2 &&
+        maxSelections &&
+        available.length <= maxSelections
+      ) {
         onSelection(available);
       }
     },
@@ -224,10 +236,11 @@ export function ModelSelector(props: ModelSelectorProps) {
   );
 
   const isCompact = variant === "compact";
+  const variantClass = styles["variant-" + variant] ?? "";
 
   return (
     <div
-      className={`${styles["model-selector"]} ${styles[`variant-${variant}`]}`}
+      className={`${styles["model-selector"]} ${variantClass}`}
       onClick={onClose}
       onKeyDown={handleKeyDown}
       role="dialog"
@@ -308,7 +321,9 @@ export function ModelSelector(props: ModelSelectorProps) {
                   aria-label={`Remove ${m.displayName}`}
                 >
                   <Avatar model={`${m.name}@${m.providerName}`} size={16} />
-                  <span className={styles["model-chip-name"]}>{m.displayName}</span>
+                  <span className={styles["model-chip-name"]}>
+                    {m.displayName}
+                  </span>
                   <CloseIcon className={styles["model-chip-remove"]} />
                 </button>
               ))}
@@ -327,7 +342,8 @@ export function ModelSelector(props: ModelSelectorProps) {
                   modelOptions.some((o) => `${o.name}@${o.providerName}` === m),
                 );
                 const isAvailable = available.length >= 2;
-                const maxOk = !maxSelections || available.length <= maxSelections;
+                const maxOk =
+                  !maxSelections || available.length <= maxSelections;
 
                 if (!isAvailable || !maxOk) return null;
 
@@ -355,20 +371,23 @@ export function ModelSelector(props: ModelSelectorProps) {
           </div>
         )}
 
-        <div className={styles["model-selector-list"]} ref={listRef} role="listbox" aria-multiselectable={multiple}>
+        <div
+          className={styles["model-selector-list"]}
+          ref={listRef}
+          role="listbox"
+          aria-multiselectable={multiple}
+        >
           {groupedModels.length === 0 ? (
             <div className={styles["model-selector-empty"]} role="status">
               {search ? (
                 <>
                   <span className={styles["model-empty-icon"]}>🔍</span>
                   <p>{Locale.Chat.Arena.NoResults}</p>
-                  <p className={styles["model-empty-hint"]}>
-                    {`"${search}"`}
-                  </p>
+                  <p className={styles["model-empty-hint"]}>{`"${search}"`}</p>
                 </>
               ) : (
                 <>
-                  <span className={styles["model-empty-icon"]">📭</span>
+                  <span className={styles["model-empty-icon"]}>📭</span>
                   <p>{Locale.Chat.Arena.NoModels}</p>
                 </>
               )}
@@ -381,14 +400,23 @@ export function ModelSelector(props: ModelSelectorProps) {
                     const value = `${m.name}@${m.providerName}`;
                     const selected = isSelected(value);
                     const disabled = isDisabled(value);
-                    return renderModelItem(m, value, selected, disabled, handleSelect);
+                    return renderModelItem(
+                      m,
+                      value,
+                      selected,
+                      disabled,
+                      handleSelect,
+                    );
                   })}
                 </div>
               )}
 
               {(showAllModels || search) &&
                 groupedModels.map(([providerName, models]) => (
-                  <div key={providerName} className={styles["model-selector-group"]}>
+                  <div
+                    key={providerName}
+                    className={styles["model-selector-group"]}
+                  >
                     <div className={styles["model-selector-group-header"]}>
                       <span className={styles["model-group-provider"]}>
                         {providerName}
@@ -402,7 +430,13 @@ export function ModelSelector(props: ModelSelectorProps) {
                         const value = `${m.name}@${m.providerName}`;
                         const selected = isSelected(value);
                         const disabled = isDisabled(value);
-                        return renderModelItem(m, value, selected, disabled, handleSelect);
+                        return renderModelItem(
+                          m,
+                          value,
+                          selected,
+                          disabled,
+                          handleSelect,
+                        );
                       })}
                     </div>
                   </div>
@@ -447,7 +481,10 @@ export function ModelSelector(props: ModelSelectorProps) {
               </div>
             ) : (
               <div className={styles["model-hint-info"]}>
-                {Locale.Chat.Arena.SelectionHint(selectedValues.length, maxSelections || 4)}
+                {Locale.Chat.Arena.SelectionHint(
+                  selectedValues.length,
+                  maxSelections || 4,
+                )}
               </div>
             )}
           </footer>
