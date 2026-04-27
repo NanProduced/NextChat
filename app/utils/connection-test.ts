@@ -1,5 +1,4 @@
 import { useAccessStore } from "../store/access";
-import { getHeaders } from "../client/api";
 
 export type ConnectionTestResult = {
   success: boolean;
@@ -23,7 +22,7 @@ export async function testOpenAIConnection(
     if (!url) {
       return {
         success: false,
-        error: "接口地址不能为空",
+        error: "Endpoint URL is required",
         timestamp: Date.now(),
       };
     }

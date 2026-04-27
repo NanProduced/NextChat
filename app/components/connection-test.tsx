@@ -8,9 +8,9 @@ import {
   formatLatency,
   getConnectionQuality,
 } from "../utils/connection-test";
-import LoadingIcon from "./icons/three-dots.svg";
-import CheckIcon from "./icons/check.svg";
-import ErrorIcon from "./icons/error.svg";
+import LoadingIcon from "../icons/three-dots.svg";
+import CheckIcon from "../icons/check.svg";
+import ErrorIcon from "../icons/error.svg";
 import styles from "./connection-test.module.scss";
 
 type ConnectionTestButtonProps = {

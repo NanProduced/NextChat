@@ -6,9 +6,9 @@ import Locale from "../locales";
 import { ServiceProvider } from "../constant";
 import { getModelProvider } from "../utils/model";
 import CloseIcon from "../icons/close.svg";
-import SearchIcon from "./icons/search.svg";
-import ChevronDownIcon from "./icons/chevron-down.svg";
-import ChevronUpIcon from "./icons/chevron-up.svg";
+import SearchIcon from "../icons/search.svg";
+import ChevronDownIcon from "../icons/chevron-down.svg";
+import ChevronUpIcon from "../icons/chevron-up.svg";
 import styles from "./model-selector.module.scss";
 
 export type ModelOption = {

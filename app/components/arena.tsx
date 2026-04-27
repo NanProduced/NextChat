@@ -5,6 +5,8 @@ import { ChatControllerPool } from "../client/controller";
 import { IconButton } from "./button";
 import Locale from "../locales";
 import { getMessageTextContent } from "../utils";
+import { getModelProvider } from "../utils/model";
+import { ServiceProvider } from "../constant";
 import StopIcon from "../icons/pause.svg";
 import CloseIcon from "../icons/close.svg";
 import styles from "./arena.module.scss";
@@ -72,8 +74,8 @@ export function ArenaModelSelector(props: {
 
   const handleSelectionChange = (values: string[]) => {
     const newModels = values.map((v) => {
-      const [model, providerName] = v.split("@");
-      return { model, providerName };
+      const [model, providerName] = getModelProvider(v);
+      return { model, providerName: providerName ?? ServiceProvider.OpenAI };
     });
     props.onChange(newModels);
   };
