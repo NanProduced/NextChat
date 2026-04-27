@@ -34,6 +34,7 @@ import {
 import { ModelConfigList } from "./model-config";
 import { CustomModelManager } from "./custom-models";
 import { CustomEndpointManager } from "./custom-endpoints";
+import { ConnectionTestButton } from "./connection-test";
 
 import { IconButton } from "./button";
 import {
@@ -747,17 +748,23 @@ export function Settings() {
         title={Locale.Settings.Access.OpenAI.Endpoint.Title}
         subTitle={Locale.Settings.Access.OpenAI.Endpoint.SubTitle}
       >
-        <input
-          aria-label={Locale.Settings.Access.OpenAI.Endpoint.Title}
-          type="text"
-          value={accessStore.openaiUrl}
-          placeholder={OPENAI_BASE_URL}
-          onChange={(e) =>
-            accessStore.update(
-              (access) => (access.openaiUrl = e.currentTarget.value),
-            )
-          }
-        ></input>
+        <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: "8px" }}>
+          <input
+            aria-label={Locale.Settings.Access.OpenAI.Endpoint.Title}
+            type="text"
+            value={accessStore.openaiUrl}
+            placeholder={OPENAI_BASE_URL}
+            onChange={(e) =>
+              accessStore.update(
+                (access) => (access.openaiUrl = e.currentTarget.value),
+              )
+            }
+          ></input>
+          <ConnectionTestButton
+            baseUrl={accessStore.openaiUrl}
+            apiKey={accessStore.openaiApiKey}
+          />
+        </div>
       </ListItem>
       <ListItem
         title={Locale.Settings.Access.OpenAI.ApiKey.Title}

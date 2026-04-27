@@ -45,7 +45,8 @@ export function AvatarPicker(props: {
   );
 }
 
-export function Avatar(props: { model?: ModelType; avatar?: string }) {
+export function Avatar(props: { model?: ModelType; avatar?: string; size?: number }) {
+  const size = props.size || 30;
   let LlmIcon = BotIconDefault;
 
   if (props.model) {
@@ -94,14 +95,14 @@ export function Avatar(props: { model?: ModelType; avatar?: string }) {
 
     return (
       <div className="no-dark">
-        <LlmIcon className="user-avatar" width={30} height={30} />
+        <LlmIcon className="user-avatar" width={size} height={size} />
       </div>
     );
   }
 
   return (
-    <div className="user-avatar">
-      {props.avatar && <EmojiAvatar avatar={props.avatar} />}
+    <div className="user-avatar" style={{ width: size, height: size }}>
+      {props.avatar && <EmojiAvatar avatar={props.avatar} size={size - 8} />}
     </div>
   );
 }

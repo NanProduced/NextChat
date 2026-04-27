@@ -5,11 +5,11 @@ import { ChatControllerPool } from "../client/controller";
 import { IconButton } from "./button";
 import Locale from "../locales";
 import { getMessageTextContent } from "../utils";
-import { ServiceProvider } from "../constant";
 import StopIcon from "../icons/pause.svg";
 import CloseIcon from "../icons/close.svg";
 import styles from "./arena.module.scss";
 import dynamic from "next/dynamic";
+import { ModelSelector } from "./model-selector";
 
 const Markdown = dynamic(async () => (await import("./markdown")).Markdown, {
   loading: () => <div className={styles["arena-loading"]}>...</div>,
@@ -64,83 +64,29 @@ export function ArenaModelSelector(props: {
   onChange: (models: ArenaModel[]) => void;
   onClose: () => void;
 }) {
-  const allModels = useAllModels();
-  const availableModels = useMemo(
-    () => allModels.filter((m) => m.available),
-    [allModels],
+  const selectedValues = useMemo(
+    () =>
+      props.selected.map((s) => `${s.model}@${s.providerName}`),
+    [props.selected],
   );
 
-  const isSelected = (model: string, providerName: string) =>
-    props.selected.some(
-      (s) => s.model === model && s.providerName === providerName,
-    );
-
-  const toggleModel = (model: string, providerName: string) => {
-    if (isSelected(model, providerName)) {
-      props.onChange(
-        props.selected.filter(
-          (s) => !(s.model === model && s.providerName === providerName),
-        ),
-      );
-    } else {
-      if (props.selected.length >= 4) return;
-      props.onChange([...props.selected, { model, providerName }]);
-    }
+  const handleSelectionChange = (values: string[]) => {
+    const newModels = values.map((v) => {
+      const [model, providerName] = v.split("@");
+      return { model, providerName };
+    });
+    props.onChange(newModels);
   };
 
   return (
-    <div className={styles["arena-model-selector"]}>
-      <div className={styles["arena-model-selector-header"]}>
-        <span className={styles["arena-model-selector-title"]}>
-          {Locale.Chat.Arena.SelectModels}
-        </span>
-        <span className={styles["arena-model-selector-count"]}>
-          {Locale.Chat.Arena.ModelCount(props.selected.length)}
-        </span>
-        <IconButton
-          icon={<CloseIcon />}
-          text={Locale.Chat.Arena.Close}
-          onClick={props.onClose}
-          className={styles["arena-model-selector-close"]}
-        />
-      </div>
-      <div className={styles["arena-model-selector-list"]}>
-        {availableModels.map((m) => {
-          const providerName =
-            m.provider?.providerName ?? (ServiceProvider.OpenAI as string);
-          const selected = isSelected(m.name, providerName);
-          const disabled = !selected && props.selected.length >= 4;
-          return (
-            <div
-              key={`${m.name}@${providerName}`}
-              className={`${styles["arena-model-item"]} ${
-                selected ? styles["arena-model-item-selected"] : ""
-              } ${disabled ? styles["arena-model-item-disabled"] : ""}`}
-              onClick={() => {
-                if (!disabled) toggleModel(m.name, providerName);
-              }}
-            >
-              <div className={styles["arena-model-checkbox"]}>
-                {selected && "✓"}
-              </div>
-              <div className={styles["arena-model-info"]}>
-                <span className={styles["arena-model-name"]}>
-                  {m.displayName || m.name}
-                </span>
-                <span className={styles["arena-model-provider"]}>
-                  {providerName}
-                </span>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-      {props.selected.length < 2 && (
-        <div className={styles["arena-model-selector-hint"]}>
-          {Locale.Chat.Arena.MinModels}
-        </div>
-      )}
-    </div>
+    <ModelSelector
+      multiple={true}
+      maxSelections={4}
+      selectedValues={selectedValues}
+      onSelection={handleSelectionChange}
+      onClose={props.onClose}
+      variant="compact"
+    />
   );
 }
 

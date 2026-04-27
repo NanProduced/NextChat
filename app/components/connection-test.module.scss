@@ -1,0 +1,214 @@
+// Connection Test Button Styles
+
+.connection-test-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.connection-test-button {
+  width: auto !important;
+  height: 32px !important;
+  padding: 0 12px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  border-radius: 6px !important;
+  transition: all 0.2s ease !important;
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0) scale(0.98);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}
+
+.connection-test-idle {
+  color: var(--primary) !important;
+  border-color: var(--primary) !important;
+  background-color: transparent !important;
+
+  &:hover {
+    background-color: var(--primary, #1677ff) !important;
+    color: white !important;
+  }
+}
+
+.connection-test-testing {
+  color: var(--primary) !important;
+  border-color: var(--primary) !important;
+  background-color: transparent !important;
+
+  svg {
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.connection-test-success {
+  color: #16a34a !important;
+  border-color: #16a34a !important;
+  background-color: transparent !important;
+
+  svg {
+    animation: check-in 0.3s ease-out;
+  }
+}
+
+@keyframes check-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.connection-test-error {
+  color: #dc2626 !important;
+  border-color: #dc2626 !important;
+  background-color: transparent !important;
+
+  svg {
+    animation: error-shake 0.4s ease-out;
+  }
+}
+
+@keyframes error-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+.connection-test-result {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  animation: result-slide-in 0.3s ease-out;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+@keyframes result-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.connection-test-result-success {
+  background-color: rgba(22, 163, 74, 0.06);
+  border: 1px solid rgba(22, 163, 74, 0.2);
+}
+
+.connection-test-result-error {
+  background-color: rgba(220, 38, 38, 0.06);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+}
+
+.connection-test-success,
+.connection-test-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+}
+
+.connection-test-icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.connection-test-success .connection-test-icon {
+  color: #16a34a;
+  background-color: rgba(22, 163, 74, 0.15);
+}
+
+.connection-test-error .connection-test-icon {
+  color: #dc2626;
+  background-color: rgba(220, 38, 38, 0.15);
+}
+
+.connection-test-details {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.connection-test-message {
+  font-weight: 500;
+  color: var(--black);
+  word-break: break-word;
+}
+
+.connection-test-success .connection-test-message {
+  color: #15803d;
+}
+
+.connection-test-error .connection-test-message {
+  color: #b91c1c;
+}
+
+.connection-test-latency {
+  font-size: 11px;
+  color: var(--second, #888);
+  font-family: "SF Mono", SFMono-Regular, Consolas, monospace;
+}
+
+@media (max-width: 640px) {
+  .connection-test-result {
+    font-size: 11px;
+    padding: 8px 10px;
+  }
+
+  .connection-test-button {
+    height: 28px !important;
+    font-size: 11px !important;
+  }
+}

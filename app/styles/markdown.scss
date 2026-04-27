@@ -1130,3 +1130,163 @@
 #dmermaid {
   display: none;
 }
+
+.think-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.think-block {
+  border-radius: 12px;
+  overflow: hidden;
+  background: linear-gradient(135deg, oklch(0.97 0.01 250), oklch(0.95 0.015 260));
+  border: 1px solid oklch(0.85 0.03 250);
+  box-shadow:
+    0 2px 8px oklch(0.7 0.02 250 / 0.15),
+    0 1px 3px oklch(0.7 0.02 250 / 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    box-shadow:
+      0 4px 16px oklch(0.7 0.02 250 / 0.2),
+      0 2px 6px oklch(0.7 0.02 250 / 0.15);
+    transform: translateY(-1px);
+  }
+}
+
+.think-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: oklch(0.45 0.05 250);
+  letter-spacing: 0.01em;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: oklch(0.93 0.02 250 / 0.5);
+    color: oklch(0.4 0.06 250);
+  }
+
+  &:active {
+    transform: scale(0.995);
+  }
+}
+
+.think-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  opacity: 0.85;
+  flex-shrink: 0;
+  animation: think-pulse 2s ease-in-out infinite;
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+@keyframes think-pulse {
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+.think-label {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  &::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: oklch(0.55 0.15 250);
+    border-radius: 50%;
+    animation: think-dot-blink 1.5s ease-in-out infinite;
+  }
+}
+
+@keyframes think-dot-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.think-chevron {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  color: oklch(0.6 0.04 250);
+  flex-shrink: 0;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.think-content {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.think-content.think-collapsed {
+  grid-template-rows: 0fr;
+}
+
+.think-content.think-expanded {
+  grid-template-rows: 1fr;
+}
+
+.think-inner {
+  min-height: 0;
+  padding: 16px 20px 20px;
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: oklch(0.35 0.03 250);
+  opacity: 0.9;
+  overflow-y: auto;
+  max-height: 450px;
+  background: oklch(0.98 0.005 250);
+  border-top: 1px solid oklch(0.88 0.025 250);
+
+  p {
+    margin-bottom: 8px;
+    margin-top: 0;
+  }
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: oklch(0.75 0.04 250 / 0.4);
+    border-radius: 3px;
+
+    &:hover {
+      background: oklch(0.7 0.05 250 / 0.6);
+    }
+  }
+}
