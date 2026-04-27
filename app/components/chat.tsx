@@ -1059,10 +1059,14 @@ function _Chat() {
   const [uploading, setUploading] = useState(false);
 
   const [arenaMode, setArenaMode] = useState(false);
+  const allModels = useAllModels();
   const [arenaModels, setArenaModels] = useState<ArenaModel[]>(() => {
     try {
       const saved = localStorage.getItem("arena-models");
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed: ArenaModel[] = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
     } catch {}
     return [];
   });
@@ -1070,10 +1074,31 @@ function _Chat() {
   const arenaStore = useArenaStore();
 
   useEffect(() => {
+    if (arenaModels.length === 0) {
+      try {
+        localStorage.removeItem("arena-models");
+      } catch {}
+      return;
+    }
+    const availableKeys = new Set(
+      allModels
+        .filter((m) => m.available)
+        .map((m) => `${m.name}@${m.provider?.id}`),
+    );
+    const valid = arenaModels.filter((am) =>
+      availableKeys.has(`${am.model}@${am.providerName}`),
+    );
+    if (valid.length !== arenaModels.length) {
+      setArenaModels(valid);
+    }
     try {
-      localStorage.setItem("arena-models", JSON.stringify(arenaModels));
+      if (valid.length > 0) {
+        localStorage.setItem("arena-models", JSON.stringify(valid));
+      } else {
+        localStorage.removeItem("arena-models");
+      }
     } catch {}
-  }, [arenaModels]);
+  }, [arenaModels, allModels]);
 
   // prompt hints
   const promptStore = usePromptStore();

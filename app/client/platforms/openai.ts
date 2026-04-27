@@ -17,6 +17,7 @@ import {
   usePluginStore,
 } from "@/app/store";
 import { collectModelsWithDefaultModel } from "@/app/utils/model";
+import { makeCustomEndpointProviderName } from "@/app/utils/hooks";
 import {
   preProcessImageContent,
   uploadImage,
@@ -97,7 +98,9 @@ export class ChatGPTApi implements LLMApi {
       }
 
       const customEndpoint = accessStore.customEndpoints?.find(
-        (e) => e.name === providerName,
+        (e) =>
+          makeCustomEndpointProviderName(e.name) === providerName ||
+          e.name === providerName,
       );
       if (customEndpoint) {
         baseUrl = customEndpoint.baseUrl;

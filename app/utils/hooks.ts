@@ -3,6 +3,23 @@ import { useAccessStore, useAppConfig } from "../store";
 import { collectModelsWithDefaultModel } from "./model";
 import { LLMModel } from "../client/api";
 
+export const CUSTOM_ENDPOINT_PREFIX = "custom:";
+
+export function isCustomEndpointProvider(providerName: string): boolean {
+  return providerName.startsWith(CUSTOM_ENDPOINT_PREFIX);
+}
+
+export function getCustomEndpointName(providerName: string): string {
+  if (isCustomEndpointProvider(providerName)) {
+    return providerName.slice(CUSTOM_ENDPOINT_PREFIX.length);
+  }
+  return providerName;
+}
+
+export function makeCustomEndpointProviderName(endpointName: string): string {
+  return CUSTOM_ENDPOINT_PREFIX + endpointName;
+}
+
 export function useAllModels() {
   const accessStore = useAccessStore();
   const configStore = useAppConfig();
@@ -22,8 +39,8 @@ export function useAllModels() {
           sorted: 9000 + i,
           displayName: modelName,
           provider: {
-            id: endpoint.name,
-            providerName: endpoint.name,
+            id: makeCustomEndpointProviderName(endpoint.name),
+            providerName: makeCustomEndpointProviderName(endpoint.name),
             providerType: "openai" as const,
             sorted: 9000,
           },
