@@ -14,15 +14,45 @@ import { useAccessStore } from "./store";
 import { ModelSize } from "./typing";
 
 export function trimTopic(topic: string) {
-  // Fix an issue where double quotes still show in the Indonesian language
-  // This will remove the specified punctuation from the end of the string
-  // and also trim quotes from both the start and end if they exist.
   return (
-    topic
-      // fix for gemini
-      .replace(/^["“”*]+|["“”*]+$/g, "")
-      .replace(/[，。！？”“"、,.!?*]*$/, "")
+    stripThinkTags(topic)
+      .replace(/^["""''*]+|["""''*]+$/g, "")
+      .replace(/[，。！？""、,.!?*]*$/, "")
   );
+}
+
+const THINK_OPEN_CLOSE = /<think[\s\S]*?<\/think>/gi;
+
+export function stripThinkTags(content: string): string {
+  return content.replace(THINK_OPEN_CLOSE, "").trim();
+}
+
+export function extractThinkParts(content: string): {
+  cleanContent: string;
+  thinkParts: string[];
+} {
+  const thinkParts: string[] = [];
+  let cleaned = "";
+  let pos = 0;
+
+  for (let i = 0; i < content.length; i++) {
+    if (content.slice(i).startsWith("<think")) {
+      cleaned += content.slice(pos, i);
+      const closeIdx = content.indexOf("</think", i);
+      if (closeIdx !== -1) {
+        thinkParts.push(content.slice(i + "<think".length, closeIdx).trim());
+        pos = closeIdx + "</think".length;
+        i = pos - 1;
+      }
+    }
+  }
+  cleaned += content.slice(pos);
+
+  return { cleanContent: cleaned.trim(), thinkParts };
+}
+
+export function hasThinkTag(content: string): boolean {
+  return /<think[\s\S]*?<\/think>/.test(content);
 }
 
 export async function copyToClipboard(text: string) {
@@ -439,7 +469,7 @@ export function getOperationId(operation: {
   method: string;
   path: string;
 }) {
-  // pattern '^[a-zA-Z0-9_-]+$'
+  // pattern '^[a-zA-Z9_-]+$'
   return (
     operation?.operationId ||
     `${operation.method.toUpperCase()}${operation.path.replaceAll("/", "_")}`

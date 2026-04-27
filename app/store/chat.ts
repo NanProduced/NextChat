@@ -65,6 +65,8 @@ export type ChatMessage = RequestMessage & {
   isMcpResponse?: boolean;
   arenaId?: string;
   arenaProviderName?: string;
+  arenaLabel?: string;
+  arenaVote?: "up" | "down";
 };
 
 export function createMessage(override: Partial<ChatMessage>): ChatMessage {
@@ -552,20 +554,23 @@ export const useChatStore = createPersistStore(
           ];
         }
 
+        const arenaId = nanoid();
+        const ARENA_LABELS = ["A", "B", "C", "D"];
+
         const userMessage: ChatMessage = createMessage({
           role: "user",
           content: mContent,
+          arenaId,
         });
 
-        const arenaId = nanoid();
-
-        const botMessages: ChatMessage[] = arenaModels.map((m) =>
+        const botMessages: ChatMessage[] = arenaModels.map((m, index) =>
           createMessage({
             role: "assistant",
             streaming: true,
             model: m.model,
             arenaId,
             arenaProviderName: m.providerName,
+            arenaLabel: ARENA_LABELS[index],
           }),
         );
 
@@ -578,6 +583,21 @@ export const useChatStore = createPersistStore(
             { ...userMessage, content: mContent },
             ...botMessages,
           ]);
+        });
+
+        import("./arena").then(({ useArenaStore }) => {
+          const arenaStore = useArenaStore.getState();
+          arenaStore.addRecord({
+            arenaId,
+            timestamp: Date.now(),
+            prompt: typeof mContent === "string" ? mContent : content,
+            models: arenaModels.map((m, i) => ({
+              model: m.model,
+              providerName: m.providerName,
+              label: ARENA_LABELS[i],
+            })),
+            voted: false,
+          });
         });
 
         arenaModels.forEach((arenaModel, index) => {
@@ -638,6 +658,30 @@ export const useChatStore = createPersistStore(
               );
             },
           });
+        });
+      },
+
+      arenaVote(arenaId: string, messageId: string, vote: "up" | "down") {
+        const session = get().currentSession();
+        const arenaMsgs = session.messages.filter((m) => m.arenaId === arenaId);
+        if (arenaMsgs.some((m) => m.arenaVote)) return;
+
+        const targetMsg = arenaMsgs.find((m) => m.id === messageId);
+        if (!targetMsg || !targetMsg.model || !targetMsg.arenaProviderName)
+          return;
+
+        get().updateTargetSession(session, (session) => {
+          for (const m of session.messages) {
+            if (m.arenaId === arenaId && m.role === "assistant") {
+              m.arenaVote = m.id === messageId ? vote : m.arenaVote;
+            }
+          }
+        });
+
+        import("./arena").then(({ useArenaStore }) => {
+          const arenaStore = useArenaStore.getState();
+          const modelKey = `${targetMsg.model}@${targetMsg.arenaProviderName}`;
+          arenaStore.vote(arenaId, modelKey, vote);
         });
       },
 

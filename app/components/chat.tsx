@@ -61,6 +61,7 @@ import {
   useChatStore,
   usePluginStore,
 } from "../store";
+import { useArenaStore } from "../store/arena";
 
 import {
   autoGrowTextArea,
@@ -88,7 +89,7 @@ import Locale from "../locales";
 
 import { IconButton } from "./button";
 import styles from "./chat.module.scss";
-import { ArenaModel, ArenaResponseGrid } from "./arena";
+import { ArenaModel, ArenaResponseGrid, BlindModeToggle } from "./arena";
 import { ModelSelector } from "./model-selector";
 
 import {
@@ -514,6 +515,7 @@ export function ChatActions(props: {
   const navigate = useNavigate();
   const chatStore = useChatStore();
   const pluginStore = usePluginStore();
+  const arenaStore = useArenaStore();
   const session = chatStore.currentSession();
 
   // switch themes
@@ -701,6 +703,13 @@ export function ChatActions(props: {
           }
           icon={<RobotIcon />}
         />
+
+        {props.arenaMode && (
+          <BlindModeToggle
+            enabled={arenaStore.blindMode}
+            onClick={() => arenaStore.toggleBlindMode()}
+          />
+        )}
 
         {showModelSelector && (
           <ModelSelector
@@ -1058,6 +1067,7 @@ function _Chat() {
     return [];
   });
   const [showArenaModelSelector, setShowArenaModelSelector] = useState(false);
+  const arenaStore = useArenaStore();
 
   useEffect(() => {
     try {
@@ -1865,6 +1875,17 @@ function _Chat() {
                           fontSize={fontSize}
                           fontFamily={fontFamily}
                           parentRef={scrollRef}
+                          blindMode={arenaStore.blindMode}
+                          hasVoted={
+                            arenaStore.hasVoted(group.messages[0]?.arenaId) ||
+                            group.messages.some((m) => m.arenaVote)
+                          }
+                          onVote={(messageId, vote) => {
+                            const arenaId = group.messages[0]?.arenaId;
+                            if (arenaId) {
+                              chatStore.arenaVote(arenaId, messageId, vote);
+                            }
+                          }}
                         />
                       </div>
                     );

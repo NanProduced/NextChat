@@ -38,6 +38,27 @@ export function ArenaToggle(props: { enabled: boolean; onClick: () => void }) {
   );
 }
 
+export function BlindModeToggle(props: {
+  enabled: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <div
+      className={`${styles["arena-toggle"]} ${styles["arena-blind-toggle"]} ${
+        props.enabled ? styles["arena-toggle-active"] : ""
+      }`}
+      onClick={props.onClick}
+    >
+      <span className={styles["arena-toggle-label"]}>
+        {Locale.Chat.Arena.BlindToggle}
+      </span>
+      <div className={styles["arena-toggle-switch"]}>
+        <div className={styles["arena-toggle-dot"]} />
+      </div>
+    </div>
+  );
+}
+
 export function ArenaModelSelector(props: {
   selected: ArenaModel[];
   onChange: (models: ArenaModel[]) => void;
@@ -123,20 +144,56 @@ export function ArenaModelSelector(props: {
   );
 }
 
+function ArenaVoteButtons(props: {
+  messageId: string;
+  onVote: (messageId: string, vote: "up" | "down") => void;
+}) {
+  return (
+    <div className={styles["arena-vote-row"]}>
+      <button
+        className={`${styles["arena-vote-btn"]} ${styles["arena-vote-btn-up"]}`}
+        onClick={() => props.onVote(props.messageId, "up")}
+      >
+        {Locale.Chat.Arena.VoteUp}
+      </button>
+      <button
+        className={`${styles["arena-vote-btn"]} ${styles["arena-vote-btn-down"]}`}
+        onClick={() => props.onVote(props.messageId, "down")}
+      >
+        {Locale.Chat.Arena.VoteDown}
+      </button>
+    </div>
+  );
+}
+
 export function ArenaResponseGrid(props: {
   messages: ChatMessage[];
   sessionId: string;
   fontSize: number;
   fontFamily: string;
   parentRef?: RefObject<HTMLDivElement>;
+  blindMode?: boolean;
+  hasVoted?: boolean;
+  onVote?: (messageId: string, vote: "up" | "down") => void;
 }) {
-  const { messages, sessionId, fontSize, fontFamily, parentRef } = props;
+  const {
+    messages,
+    sessionId,
+    fontSize,
+    fontFamily,
+    parentRef,
+    blindMode = false,
+    hasVoted = false,
+    onVote,
+  } = props;
 
   const columns = messages.length;
 
   const onStop = (messageId: string) => {
     ChatControllerPool.stop(sessionId, messageId);
   };
+
+  const showModelIdentity = !blindMode || hasVoted;
 
   return (
     <div
@@ -146,12 +203,27 @@ export function ArenaResponseGrid(props: {
       {messages.map((msg) => (
         <div key={msg.id} className={styles["arena-column"]}>
           <div className={styles["arena-column-header"]}>
-            <div className={styles["arena-column-model"]}>
-              {msg.model || "unknown"}
-            </div>
-            {msg.arenaProviderName && (
-              <div className={styles["arena-column-provider"]}>
-                {msg.arenaProviderName}
+            {blindMode && msg.arenaLabel && (
+              <div className={styles["arena-blind-label"]}>
+                {msg.arenaLabel}
+              </div>
+            )}
+            {showModelIdentity && (
+              <div
+                className={
+                  blindMode && hasVoted
+                    ? styles["arena-model-reveal"]
+                    : undefined
+                }
+              >
+                <div className={styles["arena-column-model"]}>
+                  {msg.model || "unknown"}
+                </div>
+                {msg.arenaProviderName && (
+                  <div className={styles["arena-column-provider"]}>
+                    {msg.arenaProviderName}
+                  </div>
+                )}
               </div>
             )}
             {msg.streaming ? (
@@ -184,6 +256,21 @@ export function ArenaResponseGrid(props: {
               defaultShow={true}
             />
           </div>
+          {!msg.streaming &&
+            !msg.isError &&
+            onVote &&
+            (hasVoted ? (
+              <div className={styles["arena-vote-row"]}>
+                <span className={styles["arena-vote-voted"]}>
+                  {msg.arenaVote === "up" ? "👍" : msg.arenaVote === "down" ? "👎" : Locale.Chat.Arena.Voted}
+                </span>
+              </div>
+            ) : (
+              <ArenaVoteButtons
+                messageId={msg.id}
+                onVote={onVote}
+              />
+            ))}
         </div>
       ))}
     </div>

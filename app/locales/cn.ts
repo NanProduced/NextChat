@@ -34,6 +34,11 @@ const cn = {
   },
   Chat: {
     SubTitle: (count: number) => `共 ${count} 条对话`,
+    Think: {
+      Label: "💭 思考过程",
+      Show: "展开思考",
+      Hide: "收起思考",
+    },
     EditMessage: {
       Title: "编辑消息记录",
       Topic: {
@@ -125,6 +130,21 @@ const cn = {
       PresetDomestic: "国产大模型",
       PresetOpenSource: "开源模型",
       LastUsed: "上次使用",
+      BlindMode: "盲测模式",
+      BlindToggle: "盲测",
+      VoteUp: "👍 这个更好",
+      VoteDown: "👎 不行",
+      Voted: "已投票",
+      Reveal: "揭晓模型",
+      VoteFirst: "请先投票再揭晓",
+      Stats: "战绩统计",
+      WinRate: "胜率",
+      Battles: "对决次数",
+      Rating: "Elo 评分",
+      Leaderboard: "排行榜",
+      NoRecords: "暂无对决记录",
+      Pairwise: "对战记录",
+      ModelLabel: (label: string) => `模型 ${label}`,
     },
   },
   Export: {

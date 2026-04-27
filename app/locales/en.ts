@@ -35,6 +35,11 @@ const en: LocaleType = {
   },
   Chat: {
     SubTitle: (count: number) => `${count} messages`,
+    Think: {
+      Label: "💭 Thinking",
+      Show: "Show thinking",
+      Hide: "Hide thinking",
+    },
     EditMessage: {
       Title: "Edit All Messages",
       Topic: {
@@ -126,6 +131,21 @@ const en: LocaleType = {
       PresetDomestic: "Chinese LLMs",
       PresetOpenSource: "Open Source",
       LastUsed: "Last Used",
+      BlindMode: "Blind Mode",
+      BlindToggle: "Blind",
+      VoteUp: "👍 This is better",
+      VoteDown: "👎 Not good",
+      Voted: "Voted",
+      Reveal: "Reveal Model",
+      VoteFirst: "Vote first to reveal",
+      Stats: "Battle Stats",
+      WinRate: "Win Rate",
+      Battles: "Battles",
+      Rating: "Elo Rating",
+      Leaderboard: "Leaderboard",
+      NoRecords: "No battle records yet",
+      Pairwise: "Pairwise Record",
+      ModelLabel: (label: string) => `Model ${label}`,
     },
   },
   Export: {

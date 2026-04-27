@@ -1,0 +1,101 @@
+.markdownBody {
+  composes: markdown-body;
+}
+
+.markdown-body-dark {
+  composes: dark;
+}
+
+.pre-code {
+  position: relative;
+  padding-top: 20px;
+}
+
+.think-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.think-block {
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: var(--second);
+  border: 1px solid var(--border-in-light);
+}
+
+.think-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 14px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--primary);
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+}
+
+.think-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+.think-label {
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.think-chevron {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  color: #888;
+  flex-shrink: 0;
+}
+
+.think-content {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 0.3s ease, max-height 0.3s ease;
+  overflow: hidden;
+}
+
+.think-content.think-collapsed {
+  grid-template-rows: 0fr;
+  max-height: 0 !important;
+}
+
+.think-content.think-expanded {
+  grid-template-rows: 1fr;
+}
+
+.think-inner {
+  min-height: 0;
+  padding: 10px 14px 14px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--black);
+  opacity: 0.8;
+  overflow-y: auto;
+  max-height: 400px;
+
+  p {
+    margin-bottom: 6px;
+    margin-top: 0;
+  }
+
+  &:first-child {
+    margin-top: 4px;
+  }
+}
